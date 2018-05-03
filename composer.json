@@ -4,7 +4,7 @@
     "type": "library",
     "description": "Forked port of \"pChart\" library into PHP 5",
     "keywords": ["pchart", "pChart", "statistics", "charts", "CpChart", "c-pChart"],
-    "homepage": "https://github.com/szymach/c-pchart",
+    "homepage": "https://github.com/BrunoBuiret/c-pchart",
     "authors": [
         {
             "name": "Jean-Damien Pogolotti",
