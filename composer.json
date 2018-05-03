@@ -1,8 +1,8 @@
 {
-    "name": "szymach/c-pchart",
+    "name": "online-stuff/pchart",
     "license": "GPL-3.0-only",
-    "type": "project",
-    "description": "Port of \"pChart\" library into PHP 5",
+    "type": "library",
+    "description": "Forked port of \"pChart\" library into PHP 5",
     "keywords": ["pchart", "pChart", "statistics", "charts", "CpChart", "c-pChart"],
     "homepage": "https://github.com/szymach/c-pchart",
     "authors": [
@@ -15,6 +15,10 @@
             "name": "Piotr Szymaszek",
             "homepage": "https://github.com/szymach",
             "role": "Developer of the CpChart wrapper package"
+        },
+        {
+            "name": "Bruno Buiret",
+            "role": "Developer in need of more options and possibilities"
         }
     ],
     "autoload": {
