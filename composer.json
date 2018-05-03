@@ -1,5 +1,5 @@
 {
-    "name": "bruno-buiret/c-pchart",
+    "name": "szymach/c-pchart",
     "license": "GPL-3.0-only",
     "type": "library",
     "description": "Forked port of \"pChart\" library into PHP 5",
