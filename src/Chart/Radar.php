@@ -35,6 +35,7 @@ class Radar
     {
         $this->pChartObject = $Object;
 
+        $FixedMin = isset($Format["FixedMin"]) ? $Format["FixedMin"] : VOID;
         $FixedMax = isset($Format["FixedMax"]) ? $Format["FixedMax"] : VOID;
         $AxisR = isset($Format["AxisR"]) ? $Format["AxisR"] : 60;
         $AxisG = isset($Format["AxisG"]) ? $Format["AxisG"] : 60;
@@ -86,6 +87,9 @@ class Radar
         $DrawPoints = isset($Format["DrawPoints"]) ? $Format["DrawPoints"] : true;
         $PointRadius = isset($Format["PointRadius"]) ? $Format["PointRadius"] : 4;
         $PointSurrounding = isset($Format["PointRadius"]) ? $Format["PointRadius"] : -30;
+        $PointRadiusRelative = isset($Format["PointRelativeRadius"]) ? $Format["PointRelativeRadius"] : false;
+        $PointMinimumRadius = isset($Format["PointMinimumRadius"]) ? $Format["PointMinimumRadius"] : null;
+        $PointMaximumRadius = isset($Format["PointMaximumRadius"]) ? $Format["PointMaximumRadius"] : null;
         $DrawLines = isset($Format["DrawLines"]) ? $Format["DrawLines"] : true;
         $LineLoopStart = isset($Format["LineLoopStart"]) ? $Format["LineLoopStart"] : true;
         $DrawPoly = isset($Format["DrawPoly"]) ? $Format["DrawPoly"] : false;
@@ -444,7 +448,8 @@ class Radar
                     $X = cos(deg2rad($Angle + $AxisRotation)) * $Length + $CenterX;
                     $Y = sin(deg2rad($Angle + $AxisRotation)) * $Length + $CenterY;
 
-                    $Plot[$ID][] = [$X, $Y, $Value];
+                    $Point = [$X, $Y, $Value, $PointRadius];
+                    $Plot[$ID][] = $Point;
 
                     if ($RecordImageMap) {
                         $this->pChartObject->addToImageMap(
@@ -462,6 +467,29 @@ class Radar
                 }
                 $ID++;
             }
+        }
+
+        if($PointRadiusRelative && $PointMinimumRadius && $PointMaximumRadius) {
+            list($MinimumValue, $MaximumValue) = $Values->limits();
+            $ValueRange = $MaximumValue - $MinimumValue;
+            $RadiusRange = $PointMaximumRadius - $PointMinimumRadius;
+
+            if(0 != $ValueRange) {
+                foreach($Plot as $ID => &$Points) {
+                    foreach($Points as &$Point) {
+                        $Point[3] = ((($Point[2] - $MinimumValue) * $RadiusRange) / $ValueRange) + $PointMinimumRadius;
+                    }
+                }
+            }
+            else {
+                foreach($Plot as $ID => &$Points) {
+                    foreach($Points as &$Point) {
+                        $Point[3] = $PointMinimumRadius;
+                    }
+                }
+            }
+
+            unset($Points, $Point);
         }
 
         /* Draw all that stuff! */
@@ -557,7 +585,7 @@ class Radar
                     $Object->drawFilledCircle(
                         $Points[$i][0],
                         $Points[$i][1],
-                        $PointRadius,
+                        $Points[$i][3],
                         $Color
                     );
                 }
