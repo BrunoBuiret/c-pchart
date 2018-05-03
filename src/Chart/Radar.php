@@ -47,6 +47,7 @@ class Radar
         $AxisBoxRounded = isset($Format["AxisBoxRounded"]) ? $Format["AxisBoxRounded"] : true;
         $AxisFontName = isset($Format["AxisFontName"]) ? $Format["AxisFontName"] : $this->pChartObject->FontName;
         $AxisFontSize = isset($Format["AxisFontSize"]) ? $Format["AxisFontSize"] : $this->pChartObject->FontSize;
+        $DrawAxisToAxisLines = isset($Format["DrawAxisToAxisLines"]) ? $Format["DrawAxisToAxisLines"] : true;
         $WriteValues = isset($Format["WriteValues"]) ? $Format["WriteValues"] : false;
         $WriteValuesInBubble = isset($Format["WriteValuesInBubble"]) ? $Format["WriteValuesInBubble"] : true;
         $ValueFontName = isset($Format["ValueFontName"]) ? $Format["ValueFontName"] : $this->pChartObject->FontName
@@ -245,25 +246,27 @@ class Radar
             "Alpha" => $AxisAlpha * .8,
             "Ticks" => 2
         ];
-        if ($Layout == RADAR_LAYOUT_STAR) {
-            for ($j = 1; $j <= $Segments; $j++) {
-                for ($i = 0; $i < 360; $i = $i + (360 / $Points)) {
-                    $EdgeX1 = cos(deg2rad($i + $AxisRotation)) * ($EdgeHeight / $Segments) * $j + $CenterX;
-                    $EdgeY1 = sin(deg2rad($i + $AxisRotation)) * ($EdgeHeight / $Segments) * $j + $CenterY;
-                    $EdgeX2 = cos(deg2rad($i + $AxisRotation + (360 / $Points)))
-                        * ($EdgeHeight / $Segments) * $j + $CenterX
-                    ;
-                    $EdgeY2 = sin(deg2rad($i + $AxisRotation + (360 / $Points)))
-                        * ($EdgeHeight / $Segments) * $j + $CenterY
-                    ;
+        if($DrawAxisToAxisLines) {
+            if ($Layout == RADAR_LAYOUT_STAR) {
+                for ($j = 1; $j <= $Segments; $j++) {
+                    for ($i = 0; $i < 360; $i = $i + (360 / $Points)) {
+                        $EdgeX1 = cos(deg2rad($i + $AxisRotation)) * ($EdgeHeight / $Segments) * $j + $CenterX;
+                        $EdgeY1 = sin(deg2rad($i + $AxisRotation)) * ($EdgeHeight / $Segments) * $j + $CenterY;
+                        $EdgeX2 = cos(deg2rad($i + $AxisRotation + (360 / $Points)))
+                                  * ($EdgeHeight / $Segments) * $j + $CenterX
+                        ;
+                        $EdgeY2 = sin(deg2rad($i + $AxisRotation + (360 / $Points)))
+                                  * ($EdgeHeight / $Segments) * $j + $CenterY
+                        ;
 
-                    $Object->drawLine($EdgeX1, $EdgeY1, $EdgeX2, $EdgeY2, $Color);
+                        $Object->drawLine($EdgeX1, $EdgeY1, $EdgeX2, $EdgeY2, $Color);
+                    }
                 }
-            }
-        } elseif ($Layout == RADAR_LAYOUT_CIRCLE) {
-            for ($j = 1; $j <= $Segments; $j++) {
-                $Radius = ($EdgeHeight / $Segments) * $j;
-                $Object->drawCircle($CenterX, $CenterY, $Radius, $Radius, $Color);
+            } elseif ($Layout == RADAR_LAYOUT_CIRCLE) {
+                for ($j = 1; $j <= $Segments; $j++) {
+                    $Radius = ($EdgeHeight / $Segments) * $j;
+                    $Object->drawCircle($CenterX, $CenterY, $Radius, $Radius, $Color);
+                }
             }
         }
 
