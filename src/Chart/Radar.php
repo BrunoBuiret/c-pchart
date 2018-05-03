@@ -35,7 +35,6 @@ class Radar
     {
         $this->pChartObject = $Object;
 
-        $FixedMin = isset($Format["FixedMin"]) ? $Format["FixedMin"] : VOID;
         $FixedMax = isset($Format["FixedMax"]) ? $Format["FixedMax"] : VOID;
         $AxisR = isset($Format["AxisR"]) ? $Format["AxisR"] : 60;
         $AxisG = isset($Format["AxisG"]) ? $Format["AxisG"] : 60;
@@ -448,8 +447,7 @@ class Radar
                     $X = cos(deg2rad($Angle + $AxisRotation)) * $Length + $CenterX;
                     $Y = sin(deg2rad($Angle + $AxisRotation)) * $Length + $CenterY;
 
-                    $Point = [$X, $Y, $Value, $PointRadius];
-                    $Plot[$ID][] = $Point;
+                    $Plot[$ID][] = [$X, $Y, $Value, $PointRadius, $SerieName];
 
                     if ($RecordImageMap) {
                         $this->pChartObject->addToImageMap(
@@ -469,22 +467,51 @@ class Radar
             }
         }
 
-        if($PointRadiusRelative && $PointMinimumRadius && $PointMaximumRadius) {
+        if($DrawPoints && $PointRadiusRelative && $PointMinimumRadius && $PointMaximumRadius) {
+            // https://stackoverflow.com/questions/929103/convert-a-number-range-to-another-range-maintaining-ratio
             list($MinimumValue, $MaximumValue) = $Values->limits();
             $ValueRange = $MaximumValue - $MinimumValue;
             $RadiusRange = $PointMaximumRadius - $PointMinimumRadius;
 
-            if(0 != $ValueRange) {
-                foreach($Plot as $ID => &$Points) {
-                    foreach($Points as &$Point) {
-                        $Point[3] = ((($Point[2] - $MinimumValue) * $RadiusRange) / $ValueRange) + $PointMinimumRadius;
+            if(is_array($DrawPoints)){
+                // Draw points only for provided series
+                if(0 != $ValueRange) {
+                    foreach($Plot as $ID => &$Points) {
+                        foreach($Points as &$Point) {
+                            if(!in_array($Point[4], $DrawPoints)) {
+                                continue;
+                            }
+
+                            $Point[3] = ((($Point[2] - $MinimumValue) * $RadiusRange) / $ValueRange) + $PointMinimumRadius;
+                        }
+                    }
+                }
+                else {
+                    foreach($Plot as $ID => &$Points) {
+                        foreach($Points as &$Point) {
+                            if(!in_array($Point[4], $DrawPoints)) {
+                                continue;
+                            }
+
+                            $Point[3] = $PointMinimumRadius;
+                        }
                     }
                 }
             }
             else {
-                foreach($Plot as $ID => &$Points) {
-                    foreach($Points as &$Point) {
-                        $Point[3] = $PointMinimumRadius;
+                // Draw points for every series
+                if(0 != $ValueRange) {
+                    foreach($Plot as $ID => &$Points) {
+                        foreach($Points as &$Point) {
+                            $Point[3] = ((($Point[2] - $MinimumValue) * $RadiusRange) / $ValueRange) + $PointMinimumRadius;
+                        }
+                    }
+                }
+                else {
+                    foreach($Plot as $ID => &$Points) {
+                        foreach($Points as &$Point) {
+                            $Point[3] = $PointMinimumRadius;
+                        }
                     }
                 }
             }
@@ -494,6 +521,7 @@ class Radar
 
         /* Draw all that stuff! */
         foreach ($Plot as $ID => $Points) {
+            $PointsNumber = count($Points);
             $Color = [
                 "R" => $Palette[$ID]["R"],
                 "G" => $Palette[$ID]["G"],
@@ -503,7 +531,12 @@ class Radar
             ];
 
             /* Draw the polygons */
-            if ($DrawPoly) {
+            if (
+                // Draw every polygon
+                (is_bool($DrawPoly) && $DrawPoly)
+                // Draw some polygon
+                || (is_array($DrawPoly) && $PointsNumber > 0 && in_array($Points[0][4], $DrawPoly))
+            ) {
                 if ($PolyAlpha != null) {
                     $Color = [
                         "R" => $Palette[$ID]["R"],
@@ -514,7 +547,7 @@ class Radar
                     ];
                 }
                 $PointsArray = [];
-                for ($i = 0; $i < count($Points); $i++) {
+                for ($i = 0; $i < $PointsNumber; $i++) {
                     $PointsArray[] = $Points[$i][0];
                     $PointsArray[] = $Points[$i][1];
                 }
@@ -562,17 +595,34 @@ class Radar
             /* Loop to the starting points if asked */
             if ($LineLoopStart && $DrawLines) {
                 $Object->drawLine(
-                    $Points[count($Points) - 1][0],
-                    $Points[count($Points) - 1][1],
+                    $Points[$PointsNumber - 1][0],
+                    $Points[$PointsNumber - 1][1],
                     $Points[0][0],
                     $Points[0][1],
                     $Color
                 );
             }
 
+            if(
+                // Draw every points
+                (is_bool($DrawPoints) && $DrawPoints)
+                // Draw some points
+                || (is_array($DrawPoints) && $PointsNumber > 0 && in_array($Points[0][4], $DrawPoints))
+            ) {
+
+                for ($i = 0; $i < $PointsNumber; $i++) {
+                    $Object->drawFilledCircle(
+                        $Points[$i][0],
+                        $Points[$i][1],
+                        $Points[$i][3],
+                        $Color
+                    );
+                }
+            }
+
             /* Draw the lines & points */
-            for ($i = 0; $i < count($Points); $i++) {
-                if ($DrawLines && $i < count($Points) - 1) {
+            for ($i = 0; $i < $PointsNumber; $i++) {
+                if ($DrawLines && $i < $PointsNumber - 1) {
                     $Object->drawLine(
                         $Points[$i][0],
                         $Points[$i][1],
@@ -581,14 +631,7 @@ class Radar
                         $Color
                     );
                 }
-                if ($DrawPoints) {
-                    $Object->drawFilledCircle(
-                        $Points[$i][0],
-                        $Points[$i][1],
-                        $Points[$i][3],
-                        $Color
-                    );
-                }
+
                 if ($WriteValuesInBubble && $WriteValues) {
                     $TxtPos = $this->pChartObject->getTextBox(
                         $Points[$i][0],
