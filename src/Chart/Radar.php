@@ -484,6 +484,8 @@ class Radar
 
                             $Point[3] = ((($Point[2] - $MinimumValue) * $RadiusRange) / $ValueRange) + $PointMinimumRadius;
                         }
+
+                        unset($Point);
                     }
                 }
                 else {
@@ -495,6 +497,8 @@ class Radar
 
                             $Point[3] = $PointMinimumRadius;
                         }
+
+                        unset($Point);
                     }
                 }
             }
@@ -505,6 +509,8 @@ class Radar
                         foreach($Points as &$Point) {
                             $Point[3] = ((($Point[2] - $MinimumValue) * $RadiusRange) / $ValueRange) + $PointMinimumRadius;
                         }
+
+                        unset($Point);
                     }
                 }
                 else {
@@ -513,10 +519,12 @@ class Radar
                             $Point[3] = $PointMinimumRadius;
                         }
                     }
+
+                    unset($Point);
                 }
             }
 
-            unset($Points, $Point);
+            unset($Points);
         }
 
         /* Draw all that stuff! */
