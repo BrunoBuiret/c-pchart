@@ -89,6 +89,8 @@ class Radar
         $PointRadiusRelative = isset($Format["PointRelativeRadius"]) ? $Format["PointRelativeRadius"] : false;
         $PointMinimumRadius = isset($Format["PointMinimumRadius"]) ? $Format["PointMinimumRadius"] : null;
         $PointMaximumRadius = isset($Format["PointMaximumRadius"]) ? $Format["PointMaximumRadius"] : null;
+        $ValueForcedMinimum = isset($Format["ValueForcedMinimum"]) ? $Format["ValueForcedMinimum"] : null;
+        $ValueForcedMaximum = isset($Format["ValueForcedMaximum"]) ? $Format["ValueForcedMaximum"] : null;
         $DrawLines = isset($Format["DrawLines"]) ? $Format["DrawLines"] : true;
         $LineLoopStart = isset($Format["LineLoopStart"]) ? $Format["LineLoopStart"] : true;
         $DrawPoly = isset($Format["DrawPoly"]) ? $Format["DrawPoly"] : false;
@@ -469,7 +471,9 @@ class Radar
 
         if($DrawPoints && $PointRadiusRelative && $PointMinimumRadius && $PointMaximumRadius) {
             // https://stackoverflow.com/questions/929103/convert-a-number-range-to-another-range-maintaining-ratio
-            list($MinimumValue, $MaximumValue) = $Values->limits();
+            $Limits = $Values->limits();
+            $MinimumValue = $ValueForcedMinimum ?: $Limits[0];
+            $MaximumValue = $ValueForcedMaximum ?: $Limits[1];
             $ValueRange = $MaximumValue - $MinimumValue;
             $RadiusRange = $PointMaximumRadius - $PointMinimumRadius;
 
