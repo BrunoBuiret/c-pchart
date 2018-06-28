@@ -472,8 +472,8 @@ class Radar
         if($DrawPoints && $PointRadiusRelative && $PointMinimumRadius && $PointMaximumRadius) {
             // https://stackoverflow.com/questions/929103/convert-a-number-range-to-another-range-maintaining-ratio
             $Limits = $Values->limits();
-            $MinimumValue = $ValueForcedMinimum ?: $Limits[0];
-            $MaximumValue = $ValueForcedMaximum ?: $Limits[1];
+            $MinimumValue = null !== $ValueForcedMinimum ? $ValueForcedMinimum : $Limits[0];
+            $MaximumValue = null !== $ValueForcedMaximum ? $ValueForcedMaximum : $Limits[1];
             $ValueRange = $MaximumValue - $MinimumValue;
             $RadiusRange = $PointMaximumRadius - $PointMinimumRadius;
 
