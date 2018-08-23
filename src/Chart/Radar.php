@@ -93,6 +93,7 @@ class Radar
         $ValueForcedMaximum = isset($Format["ValueForcedMaximum"]) ? $Format["ValueForcedMaximum"] : null;
         $DrawLines = isset($Format["DrawLines"]) ? $Format["DrawLines"] : true;
         $LineLoopStart = isset($Format["LineLoopStart"]) ? $Format["LineLoopStart"] : true;
+        $LinesWeight = isset($Format["LinesWeight"]) ? $Format["LinesWeight"] : null;
         $DrawPoly = isset($Format["DrawPoly"]) ? $Format["DrawPoly"] : false;
         $PolyAlpha = isset($Format["PolyAlpha"]) ? $Format["PolyAlpha"] : 40;
         $FontSize = $Object->FontSize;
@@ -606,12 +607,14 @@ class Radar
             }
             /* Loop to the starting points if asked */
             if ($LineLoopStart && $DrawLines) {
+                $Weight = null !== $LinesWeight ? ['Weight' => $LinesWeight] : [];
+
                 $Object->drawLine(
                     $Points[$PointsNumber - 1][0],
                     $Points[$PointsNumber - 1][1],
                     $Points[0][0],
                     $Points[0][1],
-                    $Color
+                    $Color + $Weight
                 );
             }
 
@@ -633,6 +636,8 @@ class Radar
             }
 
             /* Draw the lines & points */
+            $Weight = null !== $LinesWeight ? ['Weight' => $LinesWeight] : [];
+
             for ($i = 0; $i < $PointsNumber; $i++) {
                 if ($DrawLines && $i < $PointsNumber - 1) {
                     $Object->drawLine(
@@ -640,7 +645,7 @@ class Radar
                         $Points[$i][1],
                         $Points[$i + 1][0],
                         $Points[$i + 1][1],
-                        $Color
+                        $Color + $Weight
                     );
                 }
 
